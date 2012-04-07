@@ -1,0 +1,57 @@
+$Id$
+
+This file contains various python scripts for testing SOAPpy.
+
+Type "make" to run the tests. You can specify which Python interpreter
+to run the tests with, e.g. "make PYTHON=python2.5".
+
+All of the tests here work without generating errors EXCEPT:
+
+- SOAPtest.py  
+
+    Fails the 'testArray' test because 'referenced' elements are
+    included in the return object.  This is a known shortcoming of
+    SOAPpy and is on the future features list. All other tests pass.
+
+- storageTest.py
+
+    Fails because the hard-coded user/password combination is no
+    longer valid.
+
+- translateTest.py 
+
+    Fails (gracefully) with a message that the service is no longer
+    available.
+
+- excelTest.py
+
+    Fails because the EXCEL service is not available.
+
+- testClient1.py 
+
+    This is experimental code for making unit tests that depend on
+    running both a client and a server process.  It failse because the
+    code doesn't quite manage to get the server started up for the second
+    test.  This is a problem with the test, not with SOAPpy, but we
+    intend to get it fixed so that we can create better unit tests.
+
+The test files which rely on no-longer available servers should be
+removed unless we can find a replacement. This will wait for a cleanup
+associated with release of version 1.0.
+
+Also note that serveral of the client tests need to have the
+corresponding server running:
+
+	Client			Server
+	----------------------  ------------------------
+	cardClient.py		cardServer.py
+	echoClient.py		echoServer.py
+	echoHeader.py		echoServer.py
+	esj_test_client.py	esj_test_server.py
+	largeDataTest.py	echoServer.py
+	speedTest.py		echoServer.py
+
+Of course, tests which rely on access to an external URL require that
+the web is accessible.  If you are behind a firewall, try setting the
+http_proxy environment variable to the URL of your web proxy.
+	

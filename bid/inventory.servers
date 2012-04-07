@@ -1,0 +1,86 @@
+# This list of servers was taken from the SOAPBuilders Interoperability Lab
+# (http://www.xmethods.net/ilab/ilab.html) 4/23/01.
+#
+# $Id$
+
+Name: MST Bid (Microsoft SOAP Toolkit 2.0, Microsoft Windows 2000) 
+Endpoint: http://131.107.72.13/stk/Bid.wsdl
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+Name: KeithBa's BidBuy Service (.NET Web Services)
+Endpoint: http://131.107.72.13/test/bidbuy/bidbuy.asmx
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://soapinterop.org/xsd
+
+Name: JHawk's BidBuyService (.NET Remoting, Win2K)
+Endpoint: http://131.107.72.13/DotNetRemotingNI/BidBuy.soap
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+#Name: Idoox WASP
+#Endpoint: http://soap.idoox.net:8888/soap/servlet/Bid/
+#SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+#Namespace: http://www.soapinterop.org/Bid
+
+Name: Paul's Quick Bid (SOAP::Lite)
+Endpoint: http://services.soaplite.com/tradeit.cgi
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+Name: Phalanx Bid Service
+Endpoint: http://www.phalanxsys.com/ni/listener.asp
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+Nonfunctional: Buy admitted problem with the wsdl
+
+Name: PranishK's BidBuy Service (ATL Web Service)
+Endpoint: http://www.mssoapinterop.org/atls_soap/bidbuy.dll?Handler=Default
+SOAPAction: "#%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+Name: GLUE Bid
+Endpoint: http://209.61.190.164:8004/glue/http://www.soapinterop.org/Bid
+SOAPAction: "http://www.soapinterop.org/Bid#(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+Name: Aumsoft's BidBuy
+Endpoint: http://soap.aumsoft.com:8080/soap/BidBuy
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+Name: SOAP.py 0.9 (actzero.com)
+Endpoint: http://208.177.157.221:12080/xmethodsInterop
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+Name: HP SOAP
+Endpoint: http://soap.bluestone.com/scripts/SaISAPI.dll/SaServletEngine.class/hp-soap/soap/rpc/interop/BidBuy
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+Name: EasySoap++ Bid Service (San Diego)
+Endpoint: http://easysoap.no-ip.com:8080/cgi-bin/bidbuyservice
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+Name: Jake's Frontier 7.0b43 Bid Service (Santa Clara, CA)
+Endpoint: http://www.soapware.org/BidBuy
+SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+Namespace: http://www.soapinterop.org/Bid
+
+#Name: Pete's Clear Bids (CapeConnect/Win2000)
+#Endpoint: http://208.46.17.81/ccx/SOAPServlet
+#SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+#Namespace: http://www.soapinterop.org/Bid
+
+#Name: (PranishK's) ATL Server BidBuy 
+#Endpoint: http://208.46.17.121/bidbuy/bidbuy.dll?Handler=Default
+#SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+#Namespace: http://www.soapinterop.org/Bid
+
+#Name: HP-SOAP @ N+I
+#Endpoint: http://208.46.17.112/scripts/SaISAPI.dll/SaServletEngine.class/hp-soap/soap/rpc/interop/BidBuy
+#SOAPAction: "http://www.soapinterop.org/%(methodname)s"
+#Namespace: http://www.soapinterop.org/Bid
+

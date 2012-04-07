@@ -1,0 +1,15 @@
+include README*
+include LICENSE
+include RELEASE_INFO
+include TODO  
+include ChangeLog
+recursive-include SOAPpy   *.py
+recursive-include bid      *.py
+recursive-include contrib  *.py
+recursive-include docs     *.txt
+recursive-include tests    *.py
+recursive-include tests    *.wsdl
+recursive-include tools    *.py
+recursive-include validate *.py
+include validate/server.pem
+include validate/silab.servers

@@ -1,0 +1,28 @@
+Using SOAP with ZOPE
+--------------------
+
+ We can use Zope to provide web services. The first is to support SOAP like
+ XML-RPC. There are two patches for Zope 2.5.0 version and for Zope 2.6.2
+ version. To apply the path, you only need to do:
+
+ $ cd <your home zope directory>
+ $ patch -p1 < /<patch directory>/zope-2.6.2-soappy.diff
+
+ You need to install SOAPpy and fpconst. You can download this two packages
+ from here:
+
+ http://sourceforge.net/projects/pywebsvcs
+ http://software.biostat.washington.edu/statsoft/snake/fpconst/
+
+ If you are using the precompiled version of Zope, you need to add the path
+ to the PYTHONPATH environment variable to specify where this packages
+ lives.
+ To do this, add a line like this to your start script:
+
+ export PYTHONPATH=$PYTHONPATH:/usr/lib/python2.3/site-packages/
+
+ Note: This can be dangerous because in your machine you are using several
+ versions of python.
+
+ [NB: The contents of this directory contributed by Antonio Beamud
+  Montero <antonio.beamud@linkend.com>]

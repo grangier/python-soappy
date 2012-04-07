@@ -1,0 +1,175 @@
+diff -urN Zope-2.6.2-linux2-x86/lib/python/ZPublisher/HTTPRequest.py Zope-2.6.2-linux2-x86.1/lib/python/ZPublisher/HTTPRequest.py
+--- Zope-2.6.2-linux2-x86/lib/python/ZPublisher/HTTPRequest.py	2003-04-09 16:00:27.000000000 +0200
++++ Zope-2.6.2-linux2-x86.1/lib/python/ZPublisher/HTTPRequest.py	2003-11-12 14:51:01.000000000 +0100
+@@ -24,6 +24,7 @@
+ from TaintedString import TaintedString
+ from maybe_lock import allocate_lock
+ xmlrpc=None # Placeholder for module that we'll import if we have to.
++soap=None # Placeholder for module that we'll import if we have to.
+ 
+ #cgi hotfix:
+ if not hasattr(cgi, 'valid_boundary'):
+@@ -369,16 +370,26 @@
+         meth=None
+         fs=FieldStorage(fp=fp,environ=environ,keep_blank_values=1)
+         if not hasattr(fs,'list') or fs.list is None:
+-            # Hm, maybe it's an XML-RPC
++            # Hm, maybe it's an XML-RPC or SOAP
+             if (fs.headers.has_key('content-type') and
+-                fs.headers['content-type'] == 'text/xml' and
++                fs.headers['content-type'][:8] == 'text/xml' and
+                 method == 'POST'):
+-                # Ye haaa, XML-RPC!
+-                global xmlrpc
+-                if xmlrpc is None: import xmlrpc
+-                meth, self.args = xmlrpc.parse_input(fs.value)
+-                response=xmlrpc.response(response)
+-                other['RESPONSE']=self.response=response
++                if environ.has_key('HTTP_SOAPACTION'):
++                    # this is a SOAP request
++                    global soap
++                    if soap is None:
++                        import soap
++                    meth, self.args = soap.parse_input(fs.value)
++                    response = soap.response(response)
++                    other['RESPONSE'] = self.response = response
++                    other['REQUEST_METHOD'] = ''
++                else:
++                    # Ye haaa, XML-RPC!
++                    global xmlrpc
++                    if xmlrpc is None: import xmlrpc
++                    meth, self.args = xmlrpc.parse_input(fs.value)
++                    response=xmlrpc.response(response)
++                    other['RESPONSE']=self.response=response
+                 self.maybe_webdav_client = 0
+             else:
+                 self._file=fs.file
+diff -urN Zope-2.6.2-linux2-x86/lib/python/ZPublisher/soap.py Zope-2.6.2-linux2-x86.1/lib/python/ZPublisher/soap.py
+--- Zope-2.6.2-linux2-x86/lib/python/ZPublisher/soap.py	1970-01-01 01:00:00.000000000 +0100
++++ Zope-2.6.2-linux2-x86.1/lib/python/ZPublisher/soap.py	2003-11-12 14:51:01.000000000 +0100
+@@ -0,0 +1,125 @@
++"""SOAP support module
++
++by Antonio Beamud Montero <antonio.beamud@linkend.com>
++
++Based on the XML-RPC Zope support module written by Eric Kidd at UserLand 
++software and the modifications made by Petru Paler, with much help 
++from Jim Fulton at DC. 
++
++This code hooks Zope up to SOAPpy library.
++"""
++
++import sys
++from string import replace
++from HTTPResponse import HTTPResponse
++from SOAPpy import *
++from zLOG import LOG, PROBLEM, ERROR, DEBUG, INFO,TRACE
++
++Config.specialArgs=0.
++
++def parse_input(data):
++    """Parse input data and return a method path and argument tuple
++
++    The data is a string.
++    """
++    obj = Parser.parseSOAPRPC(data)
++    method = obj._name
++    args = tuple(obj._aslist)
++   
++    # Translate '.' to '/' in meth to represent object traversal.
++    method = replace(method, '.', '/')
++    return method, args
++
++# See below
++#
++# def response(anHTTPResponse):
++#     """Return a valid ZPublisher response object
++# 
++#     Use data already gathered by the existing response.
++#     The new response will replace the existing response.
++#     """
++#     # As a first cut, lets just clone the response and
++#     # put all of the logic in our refined response class below.
++#     r=Response()
++#     r.__dict__.update(anHTTPResponse.__dict__)
++#     return r
++
++
++      
++    
++#######################################################################
++# New Object response based on SoapPy
++#
++class SOAPResponse:
++    def __init__(self, real): self.__dict__['_real']=real
++    def __getattr__(self, name): return getattr(self._real, name)
++    def __setattr__(self, name, v): return setattr(self._real, name, v)
++    def __delattr__(self, name): return delattr(self._real, name)
++
++    def setBody(self, body, title='', is_error=0, bogus_str_search=None):
++        # Marshall our body as an SOAP response. Strings will be sent
++        # strings, integers as integers, etc. We do *not* convert
++        # everything to a string first.
++        status = 200
++        if isinstance(body, Types.faultType):
++            status = 500
++            # Convert Fault object to SOAP response.
++            soapbody = Types.faulType("%s:Server" % NS.ENV_T, body)
++            body = buildSOAP(soapbody,encoding=None)
++        else:
++            try:
++	        body = buildSOAP((body,),encoding=None)
++            except Exception,e:
++	        self.exception()
++                return self 
++
++        t = 'text/xml'
++        # Set our body to the XML-RPC message, and fix our MIME type.
++        self._real.setBody(body)
++        self._real.setHeader('content-type', t)
++        self._real.setHeader("content-length", str(len(body)))
++        self._real.setStatus(status)
++        return self
++
++    def exception(self, fatal=0, info=None,
++                      absuri_match=None, tag_search=None):
++        # Fetch our exception info. t is type, v is value and tb is the
++        # traceback object.
++
++        if type(info) is type(()) and len(info)==3: t,v,tb = info
++        else: t,v,tb = sys.exc_info()
++        LOG('SOAPException', TRACE, tb)
++        # Create an appropriate Fault object. Unfortunately, we throw away
++        # most of the debugging information. More useful error reporting is
++        # left as an exercise for the reader.
++        Fault=Types.faultType
++        f=None
++        try:
++            if isinstance(v, Fault):
++                f=v
++            elif isinstance(v, Exception):
++                f=Fault("%s:Server" % NS.ENV_T,
++                        "Unexpected Zope exception: %s"%str(v))
++            else:
++                f=Fault("%s:Server" % NS.ENV_T,
++                        "Unexpected Zope error value: %s"%str(v))
++        except:
++            f=Fault("%s:Server" % NS.ENV_T,
++                    "Unknown Zope fault type")
++
++        # Do the damage.
++        body = buildSOAP(f)
++	self._real.setBody(body)
++	self._real.setHeader('content-type', 'text/xml')
++        self._real.setStatus(500)
++        return tb
++
++response=SOAPResponse
++
++
++
++
++
++
++
++
